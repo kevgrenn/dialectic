@@ -19,6 +19,9 @@ type DialogueState = {
   synthesis: string | null;
   isProcessing: boolean;
   error: string | null;
+  streamingResponseA: string;
+  streamingResponseB: string;
+  streamingSynthesis: string;
 };
 
 type DialogueAction =
@@ -34,7 +37,12 @@ type DialogueAction =
   | { type: "STOP_PROCESSING" }
   | { type: "SET_ERROR"; payload: string }
   | { type: "CLEAR_ERROR" }
-  | { type: "RESET" };
+  | { type: "RESET" }
+  | { type: "SET_STREAMING_RESPONSE_A"; payload: string }
+  | { type: "SET_STREAMING_RESPONSE_B"; payload: string }
+  | { type: "UPDATE_STREAMING_SYNTHESIS"; payload: string }
+  | { type: "CLEAR_STREAMING_RESPONSES" }
+  | { type: "CLEAR_STREAMING_SYNTHESIS" };
 
 const initialState: DialogueState = {
   stage: "welcome",
@@ -53,6 +61,9 @@ const initialState: DialogueState = {
   synthesis: null,
   isProcessing: false,
   error: null,
+  streamingResponseA: "",
+  streamingResponseB: "",
+  streamingSynthesis: "",
 };
 
 const dialogueReducer = (
@@ -80,6 +91,7 @@ const dialogueReducer = (
           ...state.perspectiveA,
           messages: [...state.perspectiveA.messages, action.payload],
         },
+        streamingResponseA: "", // Clear streaming response after adding complete message
       };
     case "ADD_PERSPECTIVE_B_MESSAGE":
       return {
@@ -88,9 +100,14 @@ const dialogueReducer = (
           ...state.perspectiveB,
           messages: [...state.perspectiveB.messages, action.payload],
         },
+        streamingResponseB: "", // Clear streaming response after adding complete message
       };
     case "SET_SYNTHESIS":
-      return { ...state, synthesis: action.payload };
+      return { 
+        ...state, 
+        synthesis: action.payload,
+        streamingSynthesis: "", // Clear streaming synthesis after setting complete synthesis
+      };
     case "START_PROCESSING":
       return { ...state, isProcessing: true };
     case "STOP_PROCESSING":
@@ -99,6 +116,16 @@ const dialogueReducer = (
       return { ...state, error: action.payload };
     case "CLEAR_ERROR":
       return { ...state, error: null };
+    case "SET_STREAMING_RESPONSE_A":
+      return { ...state, streamingResponseA: action.payload };
+    case "SET_STREAMING_RESPONSE_B":
+      return { ...state, streamingResponseB: action.payload };
+    case "UPDATE_STREAMING_SYNTHESIS":
+      return { ...state, streamingSynthesis: state.streamingSynthesis + action.payload };
+    case "CLEAR_STREAMING_RESPONSES":
+      return { ...state, streamingResponseA: "", streamingResponseB: "" };
+    case "CLEAR_STREAMING_SYNTHESIS":
+      return { ...state, streamingSynthesis: "" };
     case "RESET":
       return initialState;
     default:

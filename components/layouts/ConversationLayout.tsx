@@ -48,14 +48,49 @@ const ConversationLayout: React.FC = () => {
         ...state.perspectiveB.messages.map((msg, i) => `Critic (${i+1}): ${msg}`),
       ];
       
+      // Clear streaming responses
+      dispatch({ type: "CLEAR_STREAMING_RESPONSES" });
+      
       // After user speaks, Perspective A responds
       setCurrentSpeaker(SpeakingTurn.PerspectiveA);
-      const responseA = await generatePerspectiveResponse('supporter', message, conversationHistory);
+      dispatch({ type: "CLEAR_STREAMING_RESPONSES" });
+      
+      let streamingResponseA = '';
+      const responseA = await generatePerspectiveResponse(
+        'supportive', 
+        message, 
+        conversationHistory,
+        (chunk) => {
+          // Append the new chunk to the local variable
+          streamingResponseA += chunk;
+          // Update the state with the complete streaming response so far
+          dispatch({ 
+            type: "SET_STREAMING_RESPONSE_A", 
+            payload: streamingResponseA
+          });
+        }
+      );
       dispatch({ type: "ADD_PERSPECTIVE_A_MESSAGE", payload: responseA });
       
       // Then Perspective B responds
       setCurrentSpeaker(SpeakingTurn.PerspectiveB);
-      const responseB = await generatePerspectiveResponse('critic', message, conversationHistory);
+      dispatch({ type: "CLEAR_STREAMING_RESPONSES" });
+      
+      let streamingResponseB = '';
+      const responseB = await generatePerspectiveResponse(
+        'critical', 
+        message, 
+        conversationHistory,
+        (chunk) => {
+          // Append the new chunk to the local variable
+          streamingResponseB += chunk;
+          // Update the state with the complete streaming response so far
+          dispatch({ 
+            type: "SET_STREAMING_RESPONSE_B", 
+            payload: streamingResponseB
+          });
+        }
+      );
       dispatch({ type: "ADD_PERSPECTIVE_B_MESSAGE", payload: responseB });
       
       // Set next turn to user
@@ -71,6 +106,7 @@ const ConversationLayout: React.FC = () => {
     } finally {
       setIsSubmitting(false);
       dispatch({ type: "STOP_PROCESSING" });
+      dispatch({ type: "CLEAR_STREAMING_RESPONSES" });
     }
   };
 
@@ -84,13 +120,17 @@ const ConversationLayout: React.FC = () => {
   // Generate synthesis
   const handleGenerateSynthesis = async (): Promise<void> => {
     dispatch({ type: "START_PROCESSING" });
+    dispatch({ type: "CLEAR_STREAMING_SYNTHESIS" });
     
     try {
-      // Generate synthesis using OpenAI
+      // Generate synthesis using OpenAI with streaming
       const synthesis = await generateSynthesis(
         state.userMessages,
         state.perspectiveA.messages,
-        state.perspectiveB.messages
+        state.perspectiveB.messages,
+        (chunk) => {
+          dispatch({ type: "UPDATE_STREAMING_SYNTHESIS", payload: chunk });
+        }
       );
       
       dispatch({ type: "SET_SYNTHESIS", payload: synthesis });
@@ -108,16 +148,22 @@ const ConversationLayout: React.FC = () => {
     }
   };
 
-  // Check if initial responses are still loading
-  const isInitialLoading = state.isProcessing && 
-    (state.perspectiveA.messages.length === 0 || 
-     state.perspectiveB.messages.length === 0);
-
   // Render the conversation
   return (
     <div className="w-full mx-auto h-[calc(100vh-80px)]">
+      {/* Center logo */}
+      <div className="absolute left-1/2 transform -translate-x-1/2 top-[56px] z-10">
+        <Image 
+          src="/logoVert.png" 
+          alt="Dialectic" 
+          width={158} 
+          height={115} 
+          className=""
+        />
+      </div>
+      
       <div className="flex justify-center h-full">
-        <div className="flex flex-wrap justify-center gap-4 max-w-[1100px] relative h-full">
+        <div className="flex flex-wrap justify-center gap-4 max-w-[1100px] relative h-full pt-[72px]">
           {/* Perspective A */}
           <div className="flex-1 min-w-[300px] max-w-[360px] h-full">
             <div className="relative h-full">
@@ -136,36 +182,25 @@ const ConversationLayout: React.FC = () => {
                   name={state.perspectiveA.name || "Supporter"}
                   description={state.perspectiveA.description || "Loading..."}
                   messages={state.perspectiveA.messages}
+                  streamingMessage={state.streamingResponseA}
                   avatarLetter="A"
                   avatarColor="blue"
                   isSpeaking={currentSpeaker === SpeakingTurn.PerspectiveA}
-                  isLoading={state.isProcessing && state.perspectiveA.messages.length === 0}
+                  isLoading={state.isProcessing && state.perspectiveA.messages.length === 0 && !state.streamingResponseA}
                 />
               </div>
             </div>
           </div>
           
-          {/* User Section with Image */}
-          <div className="flex-1 min-w-[320px] max-w-[360px] mt-[100px] relative h-[calc(100%-84px)]">
-            {/* User Image */}
-            <div className="absolute top-[-60px] left-1/2 transform -translate-x-1/2 z-0">
-              <Image 
-                src="/user.png" 
-                alt="User" 
-                width={56} 
-                height={56} 
-                className=""
-              />
-            </div>
-            
+          {/* User Section */}
+          <div className="flex-1 min-w-[320px] max-w-[360px] relative h-full pt-[78px]">
             <Card 
               className="h-full flex flex-col rounded-lg bg-white border-0 w-full relative z-10"
               style={{ 
-                boxShadow: "0px 1px 4px 0px rgba(12, 12, 13, 0.05)",
-                marginTop: "-16px" // Adjust to control the overlap
+                boxShadow: "0px 1px 4px 0px rgba(12, 12, 13, 0.05)"
               }}
             >
-              <CardContent className="flex flex-col h-full p-0"> {/* Extra padding at top for image overlap */}                
+              <CardContent className="flex flex-col h-full p-0">                
                 {/* Messages area */}
                 <ScrollArea className="flex-grow mb-4 h-full pr-2">
                   <div className="space-y-3">
@@ -187,33 +222,29 @@ const ConversationLayout: React.FC = () => {
                 </ScrollArea>
                 
                 {/* Synthesis button */}
-                <div className="flex justify-center mb-4">
-                  <Button
-                    variant="outline"
-                    className="gap-2"
-                    onClick={handleGenerateSynthesis}
-                    disabled={
-                      state.isProcessing ||
-                      state.userMessages.length === 0 ||
-                      state.perspectiveA.messages.length < 1 ||
-                      state.perspectiveB.messages.length < 1
-                    }
-                  >
-                    {state.isProcessing ? (
-                      <>
-                        <RefreshCw className="h-4 w-4 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        Generate Synthesis
-                        <ArrowRight className="h-4 w-4" />
-                      </>
-                    )}
-                  </Button>
-                </div>
+                {state.userMessages.length > 0 && (
+                  <div className="flex justify-center my-2">
+                    <Button
+                      onClick={handleGenerateSynthesis}
+                      variant="outline"
+                      className="gap-2"
+                      disabled={isSubmitting || state.isProcessing}
+                    >
+                      {state.isProcessing ? (
+                        <>
+                          <RefreshCw className="h-4 w-4 animate-spin" />
+                          Generating synthesis...
+                        </>
+                      ) : (
+                        <>
+                          <ArrowRight className="h-4 w-4" />
+                          Generate Synthesis
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
                 
-                {/* Input area */}
                 <div className="border-t pt-4">
                   <Textarea
                     value={message}
@@ -265,10 +296,11 @@ const ConversationLayout: React.FC = () => {
                   name={state.perspectiveB.name || "Critic"}
                   description={state.perspectiveB.description || "Loading..."}
                   messages={state.perspectiveB.messages}
+                  streamingMessage={state.streamingResponseB}
                   avatarLetter="B"
                   avatarColor="red"
                   isSpeaking={currentSpeaker === SpeakingTurn.PerspectiveB}
-                  isLoading={state.isProcessing && state.perspectiveB.messages.length === 0}
+                  isLoading={state.isProcessing && state.perspectiveB.messages.length === 0 && !state.streamingResponseB}
                 />
               </div>
             </div>

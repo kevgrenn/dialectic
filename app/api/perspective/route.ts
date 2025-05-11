@@ -11,17 +11,27 @@ const openai = new OpenAI({
 
 // Define the system prompts for each perspective
 const SYSTEM_PROMPTS: Record<PerspectiveType, string> = {
-  supportive: `You are a supportive perspective in a dialectical conversation. 
-Your role is to find merit in the user's ideas, affirm their thinking, and build upon their concepts constructively.
-Respond in a thoughtful, encouraging manner that extends and strengthens their position.
-Keep your response concise (100-150 words) and focused on advancing understanding.
-Always maintain a supportive tone while providing substantive insights.`,
+  supportive: `You are an enthusiastic advocate for the user's ideas.
+Your role is to strongly support, amplify, and build upon the user's perspective with genuine excitement.
+Do not start your response with a title.
+Find the most compelling aspects of their thinking and emphasize the positive potential.
+Respond in an encouraging, optimistic manner that extends and strengthens their position.
+Look for innovative possibilities and beneficial outcomes their ideas could lead to.
+Keep your response concise (50-100 words) and focused on advancing understanding.
+Format your response in easily digestible chunks. 
+Keep everything easy to read and digest.
+Always maintain a supportive, energetic tone while providing substantive insights.`,
 
-  critical: `You are a critical perspective in a dialectical conversation.
-Your role is to thoughtfully challenge the user's ideas by identifying potential weaknesses, assumptions, or alternative viewpoints.
-Respond in a respectful, constructive manner that offers valuable counterpoints and alternative frameworks.
-Keep your response concise (100-150 words) and focused on deepening understanding through critical analysis.
-Always maintain a respectful tone while providing substantive critiques.`
+  critical: `You are a thoughtful skeptic examining potential flaws in the user's ideas.
+Your role is to identify weaknesses, question assumptions, and challenge the user's perspective.
+Do not start your response with a title.
+Find the most questionable aspects of their thinking and highlight potential problems or contradictions.
+Respond in a direct, analytical manner that offers valuable counterpoints and alternative frameworks.
+Consider unintended consequences, logical gaps, or evidence that might contradict their position.
+Keep your response concise (50-100 words) and focused on deepening understanding through critical analysis.
+Format your response in easily digestible chunks. Do not start your response with a title.
+Keep everything easy to read and digest.
+Always maintain an intellectually rigorous tone while providing substantive critiques.`
 };
 
 export async function POST(request: Request) {
@@ -64,21 +74,46 @@ export async function POST(request: Request) {
       });
     }
 
-    // Call the OpenAI API
-    const completion = await openai.chat.completions.create({
+    // Create a stream response
+    const stream = await openai.chat.completions.create({
       model: "gpt-4o-mini", // Using GPT-4o-mini for cost efficiency, can upgrade to gpt-4o for better responses
-      messages: messages as any,
+      messages: messages as Array<OpenAI.Chat.ChatCompletionMessageParam>,
       temperature: perspective === 'supportive' ? 0.7 : 0.8, // Slightly higher temperature for critical perspective
-      max_tokens: 250,
+      max_tokens: 200, // Reduced from 250 to target 70-100 words
+      stream: true,
     });
 
-    const responseContent = completion.choices[0].message.content || "I couldn't generate a response. Please try again.";
-    
-    return NextResponse.json({ response: responseContent });
-  } catch (error: any) {
+    // Return the stream
+    const encoder = new TextEncoder();
+    const readable = new ReadableStream({
+      async start(controller) {
+        let responseText = '';
+        
+        for await (const chunk of stream) {
+          const content = chunk.choices[0]?.delta?.content || '';
+          if (content) {
+            responseText += content;
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
+          }
+        }
+        
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, fullContent: responseText })}\n\n`));
+        controller.close();
+      }
+    });
+
+    return new Response(readable, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    });
+  } catch (error: unknown) {
     console.error('Error in perspective API:', error);
+    const errorMessage = error instanceof Error ? error.message : 'An error occurred while generating the response';
     return NextResponse.json(
-      { error: error.message || 'An error occurred while generating the response' },
+      { error: errorMessage },
       { status: 500 }
     );
   }
