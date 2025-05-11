@@ -1,5 +1,5 @@
 // Define the perspective types
-export type PerspectiveType = 'supportive' | 'critical';
+export type PerspectiveType = 'supporter' | 'critic';
 
 // Generate a response from a specific perspective
 export async function generatePerspectiveResponse(

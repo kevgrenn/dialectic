@@ -26,7 +26,7 @@ const WelcomeScreen: React.FC = () => {
     dispatch({
       type: "SET_PERSPECTIVE_A",
       payload: {
-        name: "Supportive",
+        name: "Supporter",
         description: "Affirms and extends core ideas",
         messages: [],
       },
@@ -35,7 +35,7 @@ const WelcomeScreen: React.FC = () => {
     dispatch({
       type: "SET_PERSPECTIVE_B",
       payload: {
-        name: "Critical",
+        name: "Critic",
         description: "Challenges assumptions and offers alternatives",
         messages: [],
       },
@@ -49,11 +49,11 @@ const WelcomeScreen: React.FC = () => {
       dispatch({ type: "START_PROCESSING" });
       
       // Generate initial response from Perspective A
-      const responseA = await generatePerspectiveResponse('supportive', initialPrompt);
+      const responseA = await generatePerspectiveResponse('supporter', initialPrompt);
       dispatch({ type: "ADD_PERSPECTIVE_A_MESSAGE", payload: responseA });
       
       // Generate initial response from Perspective B
-      const responseB = await generatePerspectiveResponse('critical', initialPrompt);
+      const responseB = await generatePerspectiveResponse('critic', initialPrompt);
       dispatch({ type: "ADD_PERSPECTIVE_B_MESSAGE", payload: responseB });
       
     } catch (error) {
