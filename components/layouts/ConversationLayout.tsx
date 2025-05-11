@@ -148,11 +148,6 @@ const ConversationLayout: React.FC = () => {
     }
   };
 
-  // Check if initial responses are still loading
-  const isInitialLoading = state.isProcessing && 
-    (state.perspectiveA.messages.length === 0 || 
-     state.perspectiveB.messages.length === 0);
-
   // Render the conversation
   return (
     <div className="w-full mx-auto h-[calc(100vh-80px)]">

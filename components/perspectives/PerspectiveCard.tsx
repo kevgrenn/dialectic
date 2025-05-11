@@ -11,8 +11,8 @@ interface PerspectiveCardProps {
   description: string;
   messages: string[];
   streamingMessage?: string;
-  avatarLetter: string;
-  avatarColor: string;
+  avatarLetter?: string;
+  avatarColor?: string;
   isSpeaking: boolean;
   isLoading?: boolean;
 }
@@ -22,8 +22,6 @@ const PerspectiveCard: React.FC<PerspectiveCardProps> = ({
   description,
   messages,
   streamingMessage = "",
-  avatarLetter,
-  avatarColor,
   isSpeaking,
   isLoading = false,
 }) => {
@@ -88,16 +86,16 @@ const PerspectiveCard: React.FC<PerspectiveCardProps> = ({
                   >
                     <ReactMarkdown
                       components={{
-                        h1: ({node, ...props}) => <h1 className="text-md font-bold" {...props} />,
-                        h2: ({node, ...props}) => <h2 className="text-base font-bold" {...props} />,
-                        h3: ({node, ...props}) => <h3 className="text-sm font-bold" {...props} />,
-                        h4: ({node, ...props}) => <h4 className="text-sm font-bold" {...props} />,
-                        h5: ({node, ...props}) => <h5 className="text-sm font-bold" {...props} />,
-                        h6: ({node, ...props}) => <h6 className="text-sm font-bold" {...props} />,
-                        p: ({node, ...props}) => <p className="my-2 text-sm leading-relaxed" {...props} />,
-                        ul: ({node, ...props}) => <ul className="list-disc text-sm pl-4 my-2" {...props} />,
-                        ol: ({node, ...props}) => <ol className="list-decimal text-sm pl-4 my-2" {...props} />,
-                        li: ({node, ...props}) => <li className="my-1 text-sm leading-relaxed" {...props} />
+                        h1: ({...props}) => <h1 className="text-md font-bold" {...props} />,
+                        h2: ({...props}) => <h2 className="text-base font-bold" {...props} />,
+                        h3: ({...props}) => <h3 className="text-sm font-bold" {...props} />,
+                        h4: ({...props}) => <h4 className="text-sm font-bold" {...props} />,
+                        h5: ({...props}) => <h5 className="text-sm font-bold" {...props} />,
+                        h6: ({...props}) => <h6 className="text-sm font-bold" {...props} />,
+                        p: ({...props}) => <p className="my-2 text-sm leading-relaxed" {...props} />,
+                        ul: ({...props}) => <ul className="list-disc text-sm pl-4 my-2" {...props} />,
+                        ol: ({...props}) => <ol className="list-decimal text-sm pl-4 my-2" {...props} />,
+                        li: ({...props}) => <li className="my-1 text-sm leading-relaxed" {...props} />
                       }}
                     >
                       {message}

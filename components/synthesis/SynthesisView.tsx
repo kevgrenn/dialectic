@@ -9,7 +9,6 @@ import ReactMarkdown from 'react-markdown';
 
 const SynthesisView: React.FC = () => {
   const { state, dispatch } = useDialogue();
-  const scrollAreaRef = React.useRef<HTMLDivElement>(null);
 
   // Process streaming message to preserve line breaks
   const processedStreamingContent = React.useMemo(() => {

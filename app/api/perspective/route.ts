@@ -77,7 +77,7 @@ export async function POST(request: Request) {
     // Create a stream response
     const stream = await openai.chat.completions.create({
       model: "gpt-4o-mini", // Using GPT-4o-mini for cost efficiency, can upgrade to gpt-4o for better responses
-      messages: messages as any,
+      messages: messages as Array<OpenAI.Chat.ChatCompletionMessageParam>,
       temperature: perspective === 'supportive' ? 0.7 : 0.8, // Slightly higher temperature for critical perspective
       max_tokens: 200, // Reduced from 250 to target 70-100 words
       stream: true,
@@ -109,10 +109,11 @@ export async function POST(request: Request) {
         'Connection': 'keep-alive',
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in perspective API:', error);
+    const errorMessage = error instanceof Error ? error.message : 'An error occurred while generating the response';
     return NextResponse.json(
-      { error: error.message || 'An error occurred while generating the response' },
+      { error: errorMessage },
       { status: 500 }
     );
   }

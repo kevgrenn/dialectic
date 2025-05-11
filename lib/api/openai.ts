@@ -55,7 +55,7 @@ export async function generatePerspectiveResponse(
                 if (data.done) {
                   return data.fullContent || fullResponse;
                 }
-              } catch (e) {
+              } catch {
                 // Skip invalid JSON
               }
             }
@@ -129,7 +129,7 @@ export async function generateSynthesis(
                 if (data.done) {
                   return data.fullContent || fullSynthesis;
                 }
-              } catch (e) {
+              } catch {
                 // Skip invalid JSON
               }
             }

@@ -98,10 +98,11 @@ Be concise but comprehensive, focusing on the most important insights.`
         'Connection': 'keep-alive',
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in synthesis API:', error);
+    const errorMessage = error instanceof Error ? error.message : 'An error occurred while generating the synthesis';
     return NextResponse.json(
-      { error: error.message || 'An error occurred while generating the synthesis' },
+      { error: errorMessage },
       { status: 500 }
     );
   }

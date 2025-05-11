@@ -29,9 +29,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${lexendDeca.variable} ${notoSerif.variable}`}>
         <HeaderWrapper />
-        <div className="max-w-[1200px] mx-auto px-4">
-          {children}
-        </div>
+        {children}
         <Toaster />
       </body>
     </html>
