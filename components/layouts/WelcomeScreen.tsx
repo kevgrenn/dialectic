@@ -47,13 +47,45 @@ const WelcomeScreen: React.FC = () => {
     // Then fetch the AI responses in the background
     try {
       dispatch({ type: "START_PROCESSING" });
+      dispatch({ type: "CLEAR_STREAMING_RESPONSES" });
       
-      // Generate initial response from Perspective A
-      const responseA = await generatePerspectiveResponse('supporter', initialPrompt);
+      // Generate initial response from Perspective A with streaming
+      let streamingResponseA = '';
+      const responseA = await generatePerspectiveResponse(
+        'supportive', 
+        initialPrompt,
+        [],
+        (chunk) => {
+          // Append the new chunk to the local variable
+          streamingResponseA += chunk;
+          // Update the state with the complete streaming response so far
+          dispatch({ 
+            type: "SET_STREAMING_RESPONSE_A", 
+            payload: streamingResponseA
+          });
+        }
+      );
       dispatch({ type: "ADD_PERSPECTIVE_A_MESSAGE", payload: responseA });
       
-      // Generate initial response from Perspective B
-      const responseB = await generatePerspectiveResponse('critic', initialPrompt);
+      // Clear streaming responses before starting the next one
+      dispatch({ type: "CLEAR_STREAMING_RESPONSES" });
+      
+      // Generate initial response from Perspective B with streaming
+      let streamingResponseB = '';
+      const responseB = await generatePerspectiveResponse(
+        'critical', 
+        initialPrompt,
+        [],
+        (chunk) => {
+          // Append the new chunk to the local variable
+          streamingResponseB += chunk;
+          // Update the state with the complete streaming response so far
+          dispatch({ 
+            type: "SET_STREAMING_RESPONSE_B", 
+            payload: streamingResponseB
+          });
+        }
+      );
       dispatch({ type: "ADD_PERSPECTIVE_B_MESSAGE", payload: responseB });
       
     } catch (error) {
@@ -66,6 +98,7 @@ const WelcomeScreen: React.FC = () => {
     } finally {
       setIsProcessing(false);
       dispatch({ type: "STOP_PROCESSING" });
+      dispatch({ type: "CLEAR_STREAMING_RESPONSES" });
     }
   };
 

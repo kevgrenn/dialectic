@@ -7,7 +7,7 @@ export default function Header() {
       <div className="max-w-[1200px] mx-auto px-4">
         <Link href="/" className="inline-block">
           <Image 
-            src="/logo.png" 
+            src="/logoWord.png" 
             alt="Dialectic Logo" 
             width={150} 
             height={40} 
