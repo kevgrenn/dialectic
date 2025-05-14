@@ -10,6 +10,11 @@ type Perspective = {
   messages: string[];
 };
 
+type TransitionData = {
+  isTransitioning: boolean;
+  userPrompt: string;
+};
+
 type DialogueState = {
   stage: Stage;
   userInput: string;
@@ -22,6 +27,7 @@ type DialogueState = {
   streamingResponseA: string;
   streamingResponseB: string;
   streamingSynthesis: string;
+  transitionData: TransitionData;
 };
 
 type DialogueAction =
@@ -42,7 +48,8 @@ type DialogueAction =
   | { type: "SET_STREAMING_RESPONSE_B"; payload: string }
   | { type: "UPDATE_STREAMING_SYNTHESIS"; payload: string }
   | { type: "CLEAR_STREAMING_RESPONSES" }
-  | { type: "CLEAR_STREAMING_SYNTHESIS" };
+  | { type: "CLEAR_STREAMING_SYNTHESIS" }
+  | { type: "SET_TRANSITION_DATA"; payload: TransitionData };
 
 const initialState: DialogueState = {
   stage: "welcome",
@@ -64,6 +71,10 @@ const initialState: DialogueState = {
   streamingResponseA: "",
   streamingResponseB: "",
   streamingSynthesis: "",
+  transitionData: {
+    isTransitioning: false,
+    userPrompt: ""
+  }
 };
 
 const dialogueReducer = (
@@ -126,6 +137,8 @@ const dialogueReducer = (
       return { ...state, streamingResponseA: "", streamingResponseB: "" };
     case "CLEAR_STREAMING_SYNTHESIS":
       return { ...state, streamingSynthesis: "" };
+    case "SET_TRANSITION_DATA":
+      return { ...state, transitionData: action.payload };
     case "RESET":
       return initialState;
     default:

@@ -11,6 +11,7 @@ import { generatePerspectiveResponse, generateSynthesis } from "@/lib/api/openai
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { motion } from "framer-motion";
 
 // Enum for whose turn it is
 enum SpeakingTurn {
@@ -24,13 +25,31 @@ const ConversationLayout: React.FC = () => {
   const [currentSpeaker, setCurrentSpeaker] = useState<SpeakingTurn>(SpeakingTurn.User);
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [animationComplete, setAnimationComplete] = useState(false);
   
   // Set initial speaker based on processing state
   useEffect(() => {
     if (state.isProcessing && state.perspectiveA.messages.length === 0) {
       setCurrentSpeaker(SpeakingTurn.PerspectiveA);
     }
-  }, [state.isProcessing, state.perspectiveA.messages.length]);
+    
+    // Start with animation in progress, complete it after a delay (10x slower)
+    const timer = setTimeout(() => {
+      setAnimationComplete(true);
+      // Reset transition data after animation completes
+      if (state.transitionData.isTransitioning) {
+        dispatch({ 
+          type: "SET_TRANSITION_DATA", 
+          payload: {
+            isTransitioning: false,
+            userPrompt: ""
+          }
+        });
+      }
+    }, 10000); // 10x slower: 1000ms → 10000ms
+    
+    return () => clearTimeout(timer);
+  }, [state.isProcessing, state.perspectiveA.messages.length, state.transitionData.isTransitioning, dispatch]);
 
   // Handle user message submission
   const handleUserMessage = async (message: string): Promise<void> => {
@@ -148,35 +167,101 @@ const ConversationLayout: React.FC = () => {
     }
   };
 
+  // Animation variants
+  const perspectiveCardVariants = {
+    hidden: {
+      opacity: 0,
+      scale: 0.8,
+      y: 20
+    },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      transition: {
+        duration: 5, // 10x slower: 0.5s → 5s
+        ease: "easeOut"
+      }
+    }
+  };
+
+  // Animation variants for elements coming from welcome screen
+  const fromWelcomeVariants = {
+    initial: (isTransitioning: boolean) => ({
+      opacity: isTransitioning ? 0 : 0.9,
+      scale: isTransitioning ? 0.9 : 0.95,
+      y: isTransitioning ? 20 : 0
+    }),
+    animate: {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      transition: {
+        duration: 5, // 10x slower: 0.5s → 5s
+        ease: "easeOut"
+      }
+    }
+  };
+
   // Render the conversation
   return (
     <div className="w-full mx-auto h-[calc(100vh-80px)]">
       {/* Center logo */}
-      <div className="absolute left-1/2 transform -translate-x-1/2 top-[56px] z-10">
-        <Image 
-          src="/logoVert.png" 
-          alt="Dialectic" 
-          width={158} 
-          height={115} 
-          className=""
-        />
-      </div>
+      <motion.div 
+        className="absolute left-1/2 transform -translate-x-1/2 top-[56px] z-10"
+        initial={{ 
+          y: state.transitionData.isTransitioning ? -40 : -10, 
+          scale: state.transitionData.isTransitioning ? 0.8 : 0.9,
+          opacity: state.transitionData.isTransitioning ? 0.5 : 1
+        }}
+        animate={{ y: 0, scale: 1, opacity: 1 }}
+        transition={{ duration: 5 }} // 10x slower: 0.5s → 5s
+      >
+        <div className="flex flex-col items-center">
+          <Image 
+            src="/Dialectic@2x.png" 
+            alt="Dialectic" 
+            width={200} 
+            height={40} 
+            className="mb-4"
+          />
+          <Image 
+            src="/user-convo@2x.png" 
+            alt="User" 
+            width={80} 
+            height={80} 
+          />
+        </div>
+      </motion.div>
       
       <div className="flex justify-center h-full">
         <div className="flex flex-wrap justify-center gap-4 max-w-[1100px] relative h-full pt-[72px]">
           {/* Perspective A */}
-          <div className="flex-1 min-w-[300px] max-w-[360px] h-full">
+          <motion.div 
+            className="flex-1 min-w-[300px] max-w-[360px] h-full"
+            variants={perspectiveCardVariants}
+            initial="hidden"
+            animate="visible"
+            transition={{
+              delay: 2 // 10x slower: 0.2s → 2s
+            }}
+          >
             <div className="relative h-full">
               {/* Support Image */}
-              <div className="absolute top-[12px] right-[-40px] z-0">
+              <motion.div 
+                className="absolute top-[12px] right-[-40px] z-0"
+                initial={{ x: -200, opacity: 0, scale: 1.2 }}
+                animate={{ x: 0, opacity: 1, scale: 1 }}
+                transition={{ duration: 6, delay: 1 }} // 10x slower: 0.6s → 6s, 0.1s → 1s
+              >
                 <Image 
-                  src="/support.png" 
+                  src="/supporter-convo@2x.png" 
                   alt="Support" 
                   width={56} 
                   height={56} 
                   className=""
                 />
-              </div>
+              </motion.div>
               <div className="relative z-10 h-full">
                 <PerspectiveCard
                   name={state.perspectiveA.name || "Supporter"}
@@ -190,14 +275,20 @@ const ConversationLayout: React.FC = () => {
                 />
               </div>
             </div>
-          </div>
+          </motion.div>
           
           {/* User Section */}
-          <div className="flex-1 min-w-[320px] max-w-[360px] relative h-full pt-[78px]">
+          <motion.div 
+            className="flex-1 min-w-[320px] max-w-[360px] relative h-full pt-[78px]"
+            custom={state.transitionData.isTransitioning}
+            variants={fromWelcomeVariants}
+            initial="initial"
+            animate="animate"
+          >
             <Card 
               className="h-full flex flex-col rounded-lg bg-white border-0 w-full relative z-10"
               style={{ 
-                boxShadow: "0px 1px 4px 0px rgba(12, 12, 13, 0.05)"
+                boxShadow: "var(--card-shadow)"
               }}
             >
               <CardContent className="flex flex-col h-full p-0">                
@@ -250,25 +341,25 @@ const ConversationLayout: React.FC = () => {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Add your thoughts to the conversation..."
-                    className="min-h-[80px] text-base mb-2"
-                    disabled={currentSpeaker !== SpeakingTurn.User || isSubmitting || state.isProcessing}
+                    placeholder="Continue the conversation..."
+                    className="min-h-[100px] text-sm mb-4 mx-4"
+                    disabled={isSubmitting || state.isProcessing}
                   />
-                  <div className="flex justify-end">
+                  
+                  <div className="flex justify-end pb-4 px-4">
                     <Button
-                      onClick={() => handleUserMessage(message)}
-                      disabled={!message.trim() || currentSpeaker !== SpeakingTurn.User || isSubmitting || state.isProcessing}
+                      onClick={() => void handleUserMessage(message)}
+                      disabled={!message.trim() || isSubmitting || state.isProcessing}
                       className="gap-2"
                     >
-                      {isSubmitting || state.isProcessing ? (
+                      {isSubmitting ? (
                         <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Processing...
+                          <RefreshCw className="h-4 w-4 animate-spin" />
+                          Sending...
                         </>
                       ) : (
                         <>
-                          <Send className="h-4 w-4" />
-                          Send
+                          Send <Send className="h-4 w-4 ml-1" />
                         </>
                       )}
                     </Button>
@@ -276,21 +367,34 @@ const ConversationLayout: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </motion.div>
           
           {/* Perspective B */}
-          <div className="flex-1 min-w-[320px] max-w-[360px] h-full">
+          <motion.div 
+            className="flex-1 min-w-[300px] max-w-[360px] h-full"
+            variants={perspectiveCardVariants}
+            initial="hidden"
+            animate="visible"
+            transition={{
+              delay: 4 // 10x slower: 0.4s → 4s
+            }}
+          >
             <div className="relative h-full">
-              {/* Critical Image */}
-              <div className="absolute top-[12px] left-[-40px] z-0">
+              {/* Critic Image */}
+              <motion.div 
+                className="absolute top-[12px] left-[-40px] z-0"
+                initial={{ x: 200, opacity: 0, scale: 1.2 }}
+                animate={{ x: 0, opacity: 1, scale: 1 }}
+                transition={{ duration: 6, delay: 3 }} // 10x slower: 0.6s → 6s, 0.3s → 3s
+              >
                 <Image 
-                  src="/critical.png" 
-                  alt="Critical" 
+                  src="/critic-convo@2x.png" 
+                  alt="Critic" 
                   width={56} 
                   height={56} 
                   className=""
                 />
-              </div>
+              </motion.div>
               <div className="relative z-10 h-full">
                 <PerspectiveCard
                   name={state.perspectiveB.name || "Critic"}
@@ -300,11 +404,11 @@ const ConversationLayout: React.FC = () => {
                   avatarLetter="B"
                   avatarColor="red"
                   isSpeaking={currentSpeaker === SpeakingTurn.PerspectiveB}
-                  isLoading={state.isProcessing && state.perspectiveB.messages.length === 0 && !state.streamingResponseB}
+                  isLoading={state.isProcessing && state.perspectiveA.messages.length > 0 && state.perspectiveB.messages.length === 0 && !state.streamingResponseB}
                 />
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
       
