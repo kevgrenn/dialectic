@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Lexend_Deca, Noto_Serif } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import HeaderWrapper from "@/components/layouts/HeaderWrapper";
+import Image from "next/image";
 
 const lexendDeca = Lexend_Deca({
   subsets: ["latin"],
@@ -31,6 +32,18 @@ export default function RootLayout({
         <HeaderWrapper />
         {children}
         <Toaster />
+        
+        {/* Fixed background squiggle image */}
+        <div className="fixed bottom-[500px] left-1/2 transform -translate-x-1/2 w-full pointer-events-none z-[-1]">
+          <Image 
+            src="/squiggle@2x.png"
+            alt="Background decoration"
+            width={1526}
+            height={100}
+            className="mx-auto"
+            priority
+          />
+        </div>
       </body>
     </html>
   );

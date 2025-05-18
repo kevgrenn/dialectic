@@ -38,7 +38,7 @@ const UserInput: React.FC<UserInputProps> = ({ onSubmit, disabled = false }) => 
   };
 
   return (
-    <div className="w-full bg-card rounded-lg p-4 shadow-sm border">
+    <div className="w-full bg-card rounded-lg pt-4 shadow-sm border">
       <h3 className="text-lg font-medium mb-2">Your Input</h3>
       <div className="flex flex-col gap-3">
         <Textarea

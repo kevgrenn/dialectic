@@ -30,48 +30,65 @@ const PerspectiveCard: React.FC<PerspectiveCardProps> = ({
   const scrollAreaRef = React.useRef<HTMLDivElement>(null);
   const streamingContentRef = React.useRef<HTMLDivElement>(null);
   
+  // Keep track of the last completed message to prevent duplication
+  const [lastCompletedMessage, setLastCompletedMessage] = React.useState<string | null>(null);
+  const [isTransitioning, setIsTransitioning] = React.useState(false);
+  
   React.useEffect(() => {
-    if (streamingMessage && scrollAreaRef.current) {
+    // When streaming starts, clear the last completed message
+    if (streamingMessage && !isTransitioning) {
+      setLastCompletedMessage(null);
+    }
+    
+    // When streaming stops, record the last message to prevent duplication
+    if (!streamingMessage && !isTransitioning && lastCompletedMessage === null) {
+      const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
+      setLastCompletedMessage(lastMessage);
+      
+      // Set a brief transition period
+      setIsTransitioning(true);
+      const timeoutId = setTimeout(() => {
+        setIsTransitioning(false);
+        setLastCompletedMessage(null);
+      }, 150);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [streamingMessage, messages, isTransitioning, lastCompletedMessage]);
+  
+  React.useEffect(() => {
+    // Auto-scroll when streaming or new messages appear
+    if (scrollAreaRef.current && (streamingMessage || messages.length > 0)) {
       const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
       if (scrollContainer) {
         scrollContainer.scrollTop = scrollContainer.scrollHeight;
       }
     }
-  }, [streamingMessage]);
-
-  // Process streaming message to preserve line breaks
-  const processedStreamingMessage = React.useMemo(() => {
-    if (!streamingMessage) return "";
-    
-    // Split by line breaks and join with proper HTML line breaks
-    return streamingMessage
-      .split('\n')
-      .map((line, i) => <React.Fragment key={i}>{line}<br /></React.Fragment>);
-  }, [streamingMessage]);
+  }, [streamingMessage, messages]);
 
   // Animation variants
   const messageVariants = {
     hidden: { 
       opacity: 0,
-      y: 10,
-      scale: 0.95
+      y: 0
     },
     visible: { 
       opacity: 1,
       y: 0,
-      scale: 1,
       transition: {
-        duration: 3,
+        duration: 0.3,
         ease: "easeOut"
       }
     },
     exit: {
-      opacity: 0,
-      transition: {
-        duration: 2
-      }
+      opacity: 1
     }
   };
+
+  // Determine if we should show the streaming content
+  const shouldShowStreamingContent = streamingMessage && 
+    !(lastCompletedMessage === streamingMessage || 
+      (messages.length > 0 && messages[messages.length - 1] === streamingMessage));
 
   return (
     <Card 
@@ -114,49 +131,52 @@ const PerspectiveCard: React.FC<PerspectiveCardProps> = ({
               </motion.p>
             ) : (
               <>
-                <AnimatePresence>
-                  {messages.map((message, index) => (
-                    <motion.div
-                      key={index}
-                      className="prose prose-sm max-w-none"
-                      variants={messageVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="exit"
-                      transition={{ delay: index * 1 }}
-                    >
-                      <ReactMarkdown
-                        components={{
-                          h1: ({...props}) => <h1 className="text-md font-bold" {...props} />,
-                          h2: ({...props}) => <h2 className="text-base font-bold" {...props} />,
-                          h3: ({...props}) => <h3 className="text-sm font-bold" {...props} />,
-                          h4: ({...props}) => <h4 className="text-sm font-bold" {...props} />,
-                          h5: ({...props}) => <h5 className="text-sm font-bold" {...props} />,
-                          h6: ({...props}) => <h6 className="text-sm font-bold" {...props} />,
-                          p: ({...props}) => <p className="my-2 text-sm leading-relaxed" {...props} />,
-                          ul: ({...props}) => <ul className="list-disc text-sm pl-4 my-2" {...props} />,
-                          ol: ({...props}) => <ol className="list-decimal text-sm pl-4 my-2" {...props} />,
-                          li: ({...props}) => <li className="my-1 text-sm leading-relaxed" {...props} />
-                        }}
-                      >
-                        {message}
-                      </ReactMarkdown>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-                {streamingMessage && (
-                  <motion.div 
-                    className="prose prose-sm max-w-none p-2 rounded-md"
-                    ref={streamingContentRef}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 3 }}
+                {messages.map((message, index) => (
+                  <div
+                    key={index}
+                    className="prose prose-sm max-w-none"
                   >
-                    <div className="text-sm leading-relaxed">
-                      {processedStreamingMessage}
-                      {isSpeaking && <span className="animate-pulse">▌</span>}
-                    </div>
-                  </motion.div>
+                    <ReactMarkdown
+                      components={{
+                        h1: ({...props}) => <h1 className="text-md font-bold" {...props} />,
+                        h2: ({...props}) => <h2 className="text-base font-bold" {...props} />,
+                        h3: ({...props}) => <h3 className="text-sm font-bold" {...props} />,
+                        h4: ({...props}) => <h4 className="text-sm font-bold" {...props} />,
+                        h5: ({...props}) => <h5 className="text-sm font-bold" {...props} />,
+                        h6: ({...props}) => <h6 className="text-sm font-bold" {...props} />,
+                        p: ({...props}) => <p className="my-2 text-sm leading-relaxed" {...props} />,
+                        ul: ({...props}) => <ul className="list-disc text-sm pl-4 my-2" {...props} />,
+                        ol: ({...props}) => <ol className="list-decimal text-sm pl-4 my-2" {...props} />,
+                        li: ({...props}) => <li className="my-1 text-sm leading-relaxed" {...props} />
+                      }}
+                    >
+                      {message}
+                    </ReactMarkdown>
+                  </div>
+                ))}
+                {shouldShowStreamingContent && (
+                  <div 
+                    className="prose prose-sm max-w-none"
+                    ref={streamingContentRef}
+                  >
+                    <ReactMarkdown
+                      components={{
+                        h1: ({...props}) => <h1 className="text-md font-bold" {...props} />,
+                        h2: ({...props}) => <h2 className="text-base font-bold" {...props} />,
+                        h3: ({...props}) => <h3 className="text-sm font-bold" {...props} />,
+                        h4: ({...props}) => <h4 className="text-sm font-bold" {...props} />,
+                        h5: ({...props}) => <h5 className="text-sm font-bold" {...props} />,
+                        h6: ({...props}) => <h6 className="text-sm font-bold" {...props} />,
+                        p: ({...props}) => <p className="my-2 text-sm leading-relaxed" {...props} />,
+                        ul: ({...props}) => <ul className="list-disc text-sm pl-4 my-2" {...props} />,
+                        ol: ({...props}) => <ol className="list-decimal text-sm pl-4 my-2" {...props} />,
+                        li: ({...props}) => <li className="my-1 text-sm leading-relaxed" {...props} />
+                      }}
+                    >
+                      {streamingMessage}
+                    </ReactMarkdown>
+                    {isSpeaking && <span className="animate-pulse">▌</span>}
+                  </div>
                 )}
               </>
             )}
