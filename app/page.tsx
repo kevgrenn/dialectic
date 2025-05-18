@@ -8,10 +8,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Send, RefreshCw } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 // Persistent logo component that stays visible during screen transitions
 const PersistentLogo = () => {
@@ -146,7 +142,6 @@ const BackgroundCard = () => {
   }, []);
   
   const isWelcome = state.stage === "welcome";
-  const isConversation = state.stage === "conversation";
   
   // Get dimensions and position for each screen
   const welcomeStyles = {

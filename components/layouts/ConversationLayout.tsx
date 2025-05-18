@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import PerspectiveCard from "@/components/perspectives/PerspectiveCard";
 import { Textarea } from "@/components/ui/textarea";
 import { useDialogue } from "@/lib/context/DialogueContext";
-import { ArrowRight, File, RefreshCw, Send } from "lucide-react";
+import { File, RefreshCw, Send } from "lucide-react";
 import { generatePerspectiveResponse, generateSynthesis } from "@/lib/api/openai";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";

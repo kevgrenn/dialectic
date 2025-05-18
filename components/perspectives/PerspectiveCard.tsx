@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RefreshCw } from "lucide-react";
 import ReactMarkdown from 'react-markdown';
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 interface PerspectiveCardProps {
   name: string;
@@ -65,25 +65,6 @@ const PerspectiveCard: React.FC<PerspectiveCardProps> = ({
       }
     }
   }, [streamingMessage, messages]);
-
-  // Animation variants
-  const messageVariants = {
-    hidden: { 
-      opacity: 0,
-      y: 0
-    },
-    visible: { 
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.3,
-        ease: "easeOut"
-      }
-    },
-    exit: {
-      opacity: 1
-    }
-  };
 
   // Determine if we should show the streaming content
   const shouldShowStreamingContent = streamingMessage && 
