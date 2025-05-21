@@ -114,6 +114,7 @@ const PersistentLogo = () => {
                   height: "56px",
                   objectFit: "contain"
                 }}
+                className="hidden sm:block"
               />
             </motion.div>
           )}

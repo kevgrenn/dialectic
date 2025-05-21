@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useDialogue } from "@/lib/context/DialogueContext";
-import { RefreshCw, Send } from "lucide-react";
+import { RefreshCw, ArrowRight } from "lucide-react";
 import { generatePerspectiveResponse } from "@/lib/api/openai";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
@@ -302,7 +302,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ hideLogo = false, hideCar
                             {isProcessing ? (
                               <RefreshCw className="h-6 w-6 animate-spin text-primary" />
                             ) : (
-                              <Send className="h-6 w-6 text-primary" />
+                              <ArrowRight className="h-6 w-6 text-primary" />
                             )}
                           </Button>
                         </div>

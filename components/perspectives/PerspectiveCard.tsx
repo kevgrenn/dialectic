@@ -16,6 +16,7 @@ interface PerspectiveCardProps {
   avatarColor?: string;
   isSpeaking: boolean;
   isLoading?: boolean;
+  isMobile?: boolean;
 }
 
 const PerspectiveCard: React.FC<PerspectiveCardProps> = ({
@@ -25,6 +26,7 @@ const PerspectiveCard: React.FC<PerspectiveCardProps> = ({
   streamingMessage = "",
   isSpeaking,
   isLoading = false,
+  isMobile = false,
 }) => {
   // Ensure we scroll to bottom when streaming new content
   const scrollAreaRef = React.useRef<HTMLDivElement>(null);
@@ -73,7 +75,7 @@ const PerspectiveCard: React.FC<PerspectiveCardProps> = ({
 
   return (
     <Card 
-      className={`h-full flex flex-col rounded-lg bg-white border-0 w-full ${
+      className={`h-full flex flex-col ${isMobile ? 'rounded-[0px]' : 'rounded-lg'} bg-white border-0 w-full ${
         isSpeaking ? "ring-2 ring-primary/50" : ""
       }`}
       style={{ 
@@ -83,7 +85,7 @@ const PerspectiveCard: React.FC<PerspectiveCardProps> = ({
       <CardHeader className="pb-1">
         <div className="flex items-center gap-1">
           <div>
-            <CardTitle className="text-[18px] leading-[24px] tracking-[-0.01em] font-[400] font-heading text-[#3d3d3d]">{name}</CardTitle>
+            <CardTitle className="text-[18px] pt-3 leading-[24px] tracking-[-0.01em] font-[400] font-heading text-[#3d3d3d]">{name}</CardTitle>
             <CardDescription className="text-[12px] leading-[16px] text-[#777777]">{description}</CardDescription>
           </div>
         </div>

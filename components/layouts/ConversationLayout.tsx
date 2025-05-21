@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import PerspectiveCard from "@/components/perspectives/PerspectiveCard";
 import { Textarea } from "@/components/ui/textarea";
 import { useDialogue } from "@/lib/context/DialogueContext";
-import { File, RefreshCw, Send } from "lucide-react";
+import { ArrowRight, File, RefreshCw } from "lucide-react";
 import { generatePerspectiveResponse, generateSynthesis } from "@/lib/api/openai";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
@@ -244,57 +244,54 @@ const ConversationLayout: React.FC<ConversationLayoutProps> = ({ hideLogo = fals
 
   // Render mobile tab icons
   const renderMobileTabIcons = () => (
-    <div className="flex justify-center space-x-8 my-4 bg-white/80 py-2 rounded-lg shadow-sm fixed left-0 right-0 top-[112px] z-50 backdrop-blur-sm">
+    <div className="flex justify-center space-x-8 my-4 py-2 fixed left-0 right-0 top-21 z-50 ">
       <button 
         onClick={() => setActiveTab(ActiveTab.Supporter)}
-        className={`flex flex-col items-center ${activeTab === ActiveTab.Supporter ? 'opacity-100 scale-110' : 'opacity-60'} transition-all`}
+        className={`flex flex-col items-center ${activeTab === ActiveTab.Supporter ? 'opacity-100 scale-100 overflow-hidden h-[56px] ' : 'opacity-100 pt-3 overflow-hidden h-[42px] '} transition-all`}
         aria-label="Supporter perspective"
       >
         <Image 
           src="/supporter-convo@2x.png" 
           alt="Supporter" 
-          width={40} 
-          height={40}
-          className={`${activeTab === ActiveTab.Supporter && currentSpeaker === SpeakingTurn.PerspectiveA ? 'ring-2 ring-primary rounded-full' : ''}`}
+          width={56} 
+          height={56}
+          className={`${activeTab === ActiveTab.Supporter && currentSpeaker === SpeakingTurn.PerspectiveA ? '' : ''}`}
         />
-        <span className={`text-xs mt-1 font-medium ${activeTab === ActiveTab.Supporter ? 'text-primary' : 'text-gray-600'}`}>Supporter</span>
       </button>
       
       <button 
         onClick={() => setActiveTab(ActiveTab.User)}
-        className={`flex flex-col items-center ${activeTab === ActiveTab.User ? 'opacity-100 scale-110' : 'opacity-60'} transition-all`}
+        className={`flex flex-col items-center ${activeTab === ActiveTab.User ? 'opacity-100 scale-100 overflow-hidden h-[56px] ' : 'opacity-100 pt-3 overflow-hidden h-[42px]'} transition-all`}
         aria-label="Your perspective"
       >
         <Image 
           src="/user-convo@2x.png" 
           alt="User" 
-          width={40} 
-          height={40}
-          className={`${activeTab === ActiveTab.User && currentSpeaker === SpeakingTurn.User ? 'ring-2 ring-primary rounded-full' : ''}`}
+          width={56} 
+          height={56}
+          className={`${activeTab === ActiveTab.User && currentSpeaker === SpeakingTurn.User ? '' : ''}`}
         />
-        <span className={`text-xs mt-1 font-medium ${activeTab === ActiveTab.User ? 'text-primary' : 'text-gray-600'}`}>You</span>
       </button>
       
       <button 
         onClick={() => setActiveTab(ActiveTab.Critic)}
-        className={`flex flex-col items-center ${activeTab === ActiveTab.Critic ? 'opacity-100 scale-110' : 'opacity-60'} transition-all`}
+        className={`flex flex-col items-center ${activeTab === ActiveTab.Critic ? 'opacity-100 scale-100 overflow-hidden h-[56px] ' : 'opacity-100 pt-3 overflow-hidden h-[42px] '} transition-all`}
         aria-label="Critic perspective"
       >
         <Image 
           src="/critic-convo@2x.png" 
           alt="Critic" 
-          width={40} 
-          height={40}
-          className={`${activeTab === ActiveTab.Critic && currentSpeaker === SpeakingTurn.PerspectiveB ? 'ring-2 ring-primary rounded-full' : ''}`}
+          width={56} 
+          height={56}
+          className={`${activeTab === ActiveTab.Critic && currentSpeaker === SpeakingTurn.PerspectiveB ? '' : ''}`}
         />
-        <span className={`text-xs mt-1 font-medium ${activeTab === ActiveTab.Critic ? 'text-primary' : 'text-gray-600'}`}>Critic</span>
       </button>
     </div>
   );
 
   // Render the conversation
   return (
-    <div className={`w-full mx-auto h-[calc(100vh-80px)] ${animationComplete ? 'animation-complete' : ''}`}>
+    <div className={`w-full mx-auto h-[calc(100vh)] ${animationComplete ? 'animation-complete' : ''}`}>
       {/* Center logo - only render if not hidden */}
       {!hideLogo && (
         <motion.div 
@@ -336,15 +333,15 @@ const ConversationLayout: React.FC<ConversationLayoutProps> = ({ hideLogo = fals
       
       <div className="flex justify-center h-full">
         <div className={`
-          ${isMobile ? 'flex-col w-full px-4' : 'flex-wrap max-w-[1112px] gap-4'} 
+          ${isMobile ? 'flex-col w-full rounded-0' : 'flex-wrap max-w-[1112px] gap-4'} 
           flex justify-center relative h-full
-          ${isMobile ? 'pt-[140px]' : 'pt-[72px]'}
+          ${isMobile ? 'pt-[150px]' : 'pt-[72px]'}
         `}>
           {/* Perspective A - Supporter */}
           <motion.div 
             className={`
               ${isMobile ? 
-                `${activeTab === ActiveTab.Supporter ? 'block' : 'hidden'} w-full h-[calc(100vh-270px)]` : 
+                `${activeTab === ActiveTab.Supporter ? 'block' : 'hidden'} w-full h-full` : 
                 'flex-1 w-[360px] h-full'}
             `}
             variants={perspectiveCardVariants}
@@ -382,6 +379,7 @@ const ConversationLayout: React.FC<ConversationLayoutProps> = ({ hideLogo = fals
                   avatarColor="blue"
                   isSpeaking={currentSpeaker === SpeakingTurn.PerspectiveA}
                   isLoading={state.isProcessing && state.perspectiveA.messages.length === 0 && !state.streamingResponseA}
+                  isMobile={isMobile}
                 />
               </div>
             </div>
@@ -391,8 +389,8 @@ const ConversationLayout: React.FC<ConversationLayoutProps> = ({ hideLogo = fals
           <motion.div 
             className={`
               ${isMobile ? 
-                `${activeTab === ActiveTab.User ? 'block' : 'hidden'} w-full h-[calc(100vh-270px)]` : 
-                'flex-1 w-[360px] relative h-full pt-[78px]'}
+                `${activeTab === ActiveTab.User ? 'block' : 'hidden'} w-full h-full` : 
+                'flex-1 w-[360px] relative h-full pt-[78px] rounded-0'}
             `}
             custom={state.transitionData.isTransitioning}
             variants={fromWelcomeVariants}
@@ -450,13 +448,13 @@ const ConversationLayout: React.FC<ConversationLayoutProps> = ({ hideLogo = fals
                           onClick={handleGenerateSynthesis}
                           aria-label="Generate Synthesis"
                           variant="ghost"
-                          className="absolute bottom-[10px] left-[10px] p-2 h-auto"
+                          className="absolute bottom-[10px] left-[10px] p-2 gap-1 h-auto"
                           disabled={isSubmitting || state.isProcessing}
                         > 
                           {state.isProcessing ? (
-                            <RefreshCw className="h-6 w-6 animate-spin text-primary" />
+                            <File className="h-6 w-6 text-gray-400" />
                           ) : (
-                            <File className="h-6 w-6 text-primary" />
+                            <File className="h-6 w-6 text-gray-400" />
                           )}Summarize
                         </Button>
                       )}
@@ -464,13 +462,13 @@ const ConversationLayout: React.FC<ConversationLayoutProps> = ({ hideLogo = fals
                       <Button 
                         onClick={() => void handleUserMessage(message)}
                         disabled={!message.trim() || isSubmitting || state.isProcessing}
-                        className="absolute bottom-[10px] right-[10px] p-2 h-auto"
+                        className="absolute bottom-[10px] right-[10px] p-2 gap-1"
                         variant="ghost"
                       >
                         {isSubmitting || state.isProcessing ? (
-                          <RefreshCw className="h-6 w-6 animate-spin text-primary" />
+                          <RefreshCw className="h-10 w-10 animate-spin text-primary" />
                         ) : (
-                          <Send className="h-6 w-6 text-primary" />
+                          <ArrowRight className="text-primary" />
                         )}
                       </Button>
                     </div>
@@ -484,7 +482,7 @@ const ConversationLayout: React.FC<ConversationLayoutProps> = ({ hideLogo = fals
           <motion.div 
             className={`
               ${isMobile ? 
-                `${activeTab === ActiveTab.Critic ? 'block' : 'hidden'} w-full h-[calc(100vh-270px)]` : 
+                `${activeTab === ActiveTab.Critic ? 'block' : 'hidden'} w-full h-full` : 
                 'flex-1 w-[360px] h-full'}
             `}
             variants={perspectiveCardVariants}
@@ -522,6 +520,7 @@ const ConversationLayout: React.FC<ConversationLayoutProps> = ({ hideLogo = fals
                   avatarColor="red"
                   isSpeaking={currentSpeaker === SpeakingTurn.PerspectiveB}
                   isLoading={state.isProcessing && state.perspectiveA.messages.length > 0 && state.perspectiveB.messages.length === 0 && !state.streamingResponseB}
+                  isMobile={isMobile}
                 />
               </div>
             </div>
