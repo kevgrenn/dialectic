@@ -5,18 +5,17 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useDialogue } from "@/lib/context/DialogueContext";
-import { RefreshCw, ArrowRight } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { generatePerspectiveResponse } from "@/lib/api/openai";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface WelcomeScreenProps {
-  hideLogo?: boolean;
   hideCard?: boolean;
 }
 
-const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ hideLogo = false, hideCard = false }) => {
+const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ hideCard = false }) => {
   const { dispatch } = useDialogue();
   const [initialPrompt, setInitialPrompt] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -66,7 +65,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ hideLogo = false, hideCar
       type: "SET_PERSPECTIVE_B",
       payload: {
         name: "Critic",
-        description: "Challenges assumptions and offers alternatives",
+        description: "Pokes holes with wit and sarcasm",
         messages: [],
       },
     });
@@ -164,46 +163,44 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ hideLogo = false, hideCar
 
   return (
     <div className="w-full mx-auto min-h-screen">
-      {/* Center logo - only render if not hidden */}
-      {!hideLogo && (
-        <motion.div 
-          className="absolute left-1/2 transform -translate-x-1/2 top-[108px]"
-          style={{ zIndex: 50 }} // Logo always on top
-          initial={{ scale: 1, y: 15, opacity: 1 }}
-          animate={{ 
-            scale: 1,
-            y: isAnimating ? -52 : 0, // Just move up to final position (108px -> 56px)
-            opacity: 1, // Always fully opaque
-          }}
-          transition={{ 
-            duration: isAnimating ? 0.5 : 0.5,
-            ease: "easeInOut"
-          }}
-        >
-          <div className="flex flex-col items-center">
+      {/* Center logo */}
+      <motion.div 
+        className="absolute left-1/2 transform -translate-x-1/2 top-[108px]"
+        style={{ zIndex: 50 }} // Logo always on top
+        initial={{ scale: 1, y: 15, opacity: 1 }}
+        animate={{ 
+          scale: 1,
+          y: isAnimating ? -52 : 0, // Just move up to final position (108px -> 56px)
+          opacity: 1, // Always fully opaque
+        }}
+        transition={{ 
+          duration: isAnimating ? 0.5 : 0.5,
+          ease: "easeInOut"
+        }}
+      >
+        <div className="flex flex-col items-center">
+          <Image 
+            src="/Dialectic@2x.png" 
+            alt="Dialectic" 
+            width={158} 
+            height={45} 
+            className="mb-8"
+          />
+          <motion.div
+            className="w-[56px] h-[56px]"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             <Image 
-              src="/Dialectic@2x.png" 
-              alt="Dialectic" 
-              width={158} 
-              height={45} 
-              className="mb-8"
+              src="/user-intro@2x.png" 
+              alt="User" 
+              width={56} 
+              height={56} 
             />
-            <motion.div
-              className="w-[56px] h-[56px]"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <Image 
-                src="/user-intro@2x.png" 
-                alt="User" 
-                width={56} 
-                height={56} 
-              />
-            </motion.div>
-          </div>
-        </motion.div>
-      )}
+          </motion.div>
+        </div>
+      </motion.div>
       
       <div className="flex flex-col justify-start items-center h-screen">
         {/* Subheadline positioned above the card */}
@@ -302,7 +299,13 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ hideLogo = false, hideCar
                             {isProcessing ? (
                               <RefreshCw className="h-6 w-6 animate-spin text-primary" />
                             ) : (
-                              <ArrowRight className="h-6 w-6 text-primary" />
+                              <Image 
+                                src="/arrow-right-bold.svg" 
+                                alt="Send" 
+                                width={24} 
+                                height={24} 
+                                className="h-6 w-6 text-primary"
+                              />
                             )}
                           </Button>
                         </div>
