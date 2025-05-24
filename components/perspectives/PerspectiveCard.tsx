@@ -158,7 +158,6 @@ const PerspectiveCard: React.FC<PerspectiveCardProps> = ({
                     >
                       {streamingMessage}
                     </ReactMarkdown>
-                    {isSpeaking && <span className="animate-pulse">▌</span>}
                   </div>
                 )}
               </>
