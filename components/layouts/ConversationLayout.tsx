@@ -317,7 +317,7 @@ const ConversationLayout: React.FC = () => {
     return (
       <div key={index} className="flex items-end mb-6">
         {/* Avatar positioned to the left, aligned to bottom */}
-        <div className="mr-3 mb-1">
+        <div className="mr-3 mb-1 ml-[10px] flex-shrink-0">
           <Image 
             src={isSupporter ? "/supporter-convo@2x.png" : "/critic-convo@2x.png"}
             alt={isSupporter ? "Supporter" : "Critic"}
@@ -373,7 +373,7 @@ const ConversationLayout: React.FC = () => {
     return (
       <div className="flex items-end mb-6">
         {/* Avatar positioned to the left, aligned to bottom */}
-        <div className="mr-3 mb-1">
+        <div className="mr-3 mb-1 ml-[10px] flex-shrink-0">
           <Image 
             src={isSupporter ? "/supporter-convo@2x.png" : "/critic-convo@2x.png"}
             alt={isSupporter ? "Supporter" : "Critic"}
@@ -413,7 +413,6 @@ const ConversationLayout: React.FC = () => {
               >
                 {content}
               </ReactMarkdown>
-              <span className="animate-pulse">▌</span>
             </div>
           </div>
         </div>
@@ -449,7 +448,6 @@ const ConversationLayout: React.FC = () => {
             >
               {content}
             </ReactMarkdown>
-            <span className="animate-pulse">▌</span>
           </div>
         </div>
       </div>
@@ -458,27 +456,58 @@ const ConversationLayout: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-background relative">
-      {/* User icon and logo positioned in top left */}
+      {/* Desktop: User icon and logo positioned in top left (hidden below 1200px) */}
       <div className="absolute top-[36px] left-[36px] z-10 flex items-center">
         <Image 
           src="/user-intro@2x.png" 
           alt="User" 
           width={56} 
           height={56}
+          className="hidden lg:block cursor-pointer"
+          onClick={() => {
+            dispatch({ type: "RESET" });
+            dispatch({ type: "SET_STAGE", payload: "welcome" });
+          }}
         />
         <Image 
           src="/Dialectic@2x.png" 
           alt="Dialectic" 
           width={88} 
           height={25}
-          className="ml-3"
+          className="ml-3 hidden xl:block cursor-pointer"
+          onClick={() => {
+            dispatch({ type: "RESET" });
+            dispatch({ type: "SET_STAGE", payload: "welcome" });
+          }}
         />
       </div>
 
+      {/* Mobile header (shown below 1000px) */}
+      <div className="lg:hidden w-full h-[60px] bg-background flex items-center justify-center z-20" style={{ boxShadow: "var(--card-shadow)" }}>
+        <div className="flex items-center cursor-pointer" onClick={() => {
+          dispatch({ type: "RESET" });
+          dispatch({ type: "SET_STAGE", payload: "welcome" });
+        }}>
+          <Image 
+            src="/user-intro@2x.png" 
+            alt="User" 
+            width={36} 
+            height={36}
+          />
+          <Image 
+            src="/Dialectic@2x.png" 
+            alt="Dialectic" 
+            width={66} 
+            height={24}
+            className="ml-2"
+          />
+        </div>
+      </div>
+
       {/* Chat messages area */}
-      <div className="flex-1 overflow-hidden relative">
+      <div className="flex-1 overflow-hidden relative lg:pt-0 pt-0">
         <ScrollArea className="h-full" ref={scrollAreaRef}>
-          <div className="pt-6 pb-4 pr-[50px] space-y-4 max-w-[780px] mx-auto">
+          <div className="pt-6 pb-4 pr-[10px] sm:pr-[50px] space-y-4 max-w-[780px] mx-auto">
             {chatMessages.length === 0 ? (
               <div className="text-center text-gray-500 mt-8">
                 <p>Start the conversation by typing a message below...</p>
@@ -501,8 +530,8 @@ const ConversationLayout: React.FC = () => {
       </div>
 
       {/* Input area */}
-      <div className="mb-0 px-[50px] w-[780px] mx-auto ">
-        <div className="bg-white rounded-t-xl rounded-b-none p-4" style={{ boxShadow: "var(--card-shadow)" }}>
+      <div className="mb-0 px-0 w-full lg:px-[50px] lg:w-[780px] lg:mx-auto">
+        <div className="bg-white rounded-t-none lg:rounded-t-xl rounded-b-none p-4" style={{ boxShadow: "var(--card-shadow)" }}>
           {/* Top row: Text area and submit button */}
           <div className="flex items-end space-x-3 mb-3">
             <div className="flex-1">
@@ -520,7 +549,7 @@ const ConversationLayout: React.FC = () => {
             <Button 
               onClick={() => void handleUserMessage(message)}
               disabled={!message.trim() || isSubmitting || state.isProcessing}
-              className="px-2 py-2 min-h-[60px] max-h-[120px] bg-[#FDF16A]"
+              className="px-2 py-2 min-h-[60px] max-h-[120px] bg-[#FDF16A] hover:bg-[#EFE032]"
             >
               <Image 
                 src="/arrow-right-bold.svg"

@@ -24,6 +24,14 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ hideCard = false }) => {
   const [formContent, setFormContent] = useState<React.ReactNode | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
+  // Reset local state when component mounts (when returning from conversation)
+  React.useEffect(() => {
+    setInitialPrompt("");
+    setIsProcessing(false);
+    setIsAnimating(false);
+    setFormContent(null);
+  }, []);
+
   // Set card as loaded after initial render
   React.useEffect(() => {
     // Delay icon animations until after the card is loaded
@@ -221,7 +229,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ hideCard = false }) => {
         
         {/* User Section - Centered card matching the user card in conversation layout */}
         <motion.div 
-          className="w-[360px] relative" 
+          className="w-[360px] relative sm:w-[360px] max-[480px]:w-full max-[480px]:flex-1 max-[480px]:flex max-[480px]:flex-col max-[480px]:mt-0 max-[480px]:h-auto max-[480px]:max-h-none max-[480px]:min-h-0" 
           initial={{ y: 60 }}
           animate={{ y: 0 }}
           transition={{ duration: 0.5 }}
@@ -239,7 +247,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ hideCard = false }) => {
             <motion.div
               ref={cardRef}
               layout
-              className="w-full h-full"
+              className="w-full h-full max-[480px]:flex-1"
               style={{ position: "relative", zIndex: 20 }} // Card container always above icons
               initial={{ opacity: 1 }}
               animate={{ 
@@ -248,7 +256,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ hideCard = false }) => {
               transition={{ duration: isAnimating ? 5 : 0.5 }}
             >
               <Card 
-                className="flex flex-col rounded-lg bg-white border-0 w-full h-full relative p-0"
+                className="flex flex-col rounded-lg bg-white border-0 w-full h-full relative p-0 max-[480px]:rounded-none max-[480px]:flex-1"
                 style={{ 
                   boxShadow: "var(--card-shadow)"
                 }}
@@ -293,8 +301,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ hideCard = false }) => {
                           <Button 
                             onClick={startConversation}
                             disabled={!initialPrompt.trim() || isProcessing || isAnimating}
-                            className="absolute bottom-[22px] right-[10px] p-2 h-auto"
-                            variant="ghost"
+                            className="absolute bottom-[12px] right-[10px] px-2 py-2 min-h-[60px] max-h-[120px] bg-[#FDF16A] hover:bg-[#EFE032]"
                           >
                             {isProcessing ? (
                               <RefreshCw className="h-6 w-6 animate-spin text-primary" />
@@ -302,9 +309,9 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ hideCard = false }) => {
                               <Image 
                                 src="/arrow-right-bold.svg" 
                                 alt="Send" 
-                                width={24} 
-                                height={24} 
-                                className="h-6 w-6 text-primary"
+                                width={20} 
+                                height={20} 
+                                className="h-5 w-5"
                               />
                             )}
                           </Button>
@@ -319,7 +326,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ hideCard = false }) => {
 
           {/* Supporter icon on left side - positioned behind the card */}
           <motion.div 
-            className="absolute left-[-40px] top-[32px]"
+            className="absolute left-[-40px] top-[32px] max-[480px]:left-[20px] max-[480px]:top-[-40px] max-[480px]:z-30"
             style={{ zIndex: 5 }} // Always behind card
             initial={{ opacity: 0, x: 40 }}
             animate={{ 
@@ -342,7 +349,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ hideCard = false }) => {
           
           {/* Critic icon on right side - positioned behind the card */}
           <motion.div 
-            className="absolute right-[-40px] top-[32px]"
+            className="absolute right-[-40px] top-[32px] max-[480px]:right-[20px] max-[480px]:top-[-40px] max-[480px]:z-30"
             style={{ zIndex: 5 }} // Always behind card
             initial={{ opacity: 0, x: -40 }}
             animate={{ 
@@ -362,6 +369,24 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ hideCard = false }) => {
               height={56} 
             />
           </motion.div>
+        </motion.div>
+        
+        {/* Disclaimer text */}
+        <motion.div
+          className="text-center max-w-[360px] w-full mt-4 max-[480px]:px-4"
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <p className="text-[12px] leading-[16px] text-[#777777]">
+            Preview release. AI-powered conversations may contain errors.{" "}
+            <a 
+              href="mailto:kevin.grennan@gmail.com" 
+              className="text-[#777777] underline hover:text-[#3d3d3d]"
+            >
+              Send feedback
+            </a>
+          </p>
         </motion.div>
       </div>
       
