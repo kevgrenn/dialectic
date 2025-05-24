@@ -385,9 +385,9 @@ const ConversationLayout: React.FC = () => {
         
         <div className="flex flex-col items-start max-w-[460px]">
           {/* Card-style message bubble */}
-          <div className="relative bg-white rounded-t-lg rounded-b-none px-4 py-3 shadow-sm border-0" style={{ boxShadow: "var(--card-shadow)" }}>
+          <div className="relative bg-white rounded-t-xl rounded-br-xl px-4 py-3 shadow-sm border-0" style={{ boxShadow: "var(--card-shadow)" }}>
             {/* Speech bubble tail */}
-            <div className="absolute bottom-0 left-0 w-0 h-0 border-t-[12px] border-r-[12px] border-t-white border-r-transparent transform translate-y-full -translate-x-1"></div>
+            <div className="absolute bottom-3 left-[-8px] w-0 h-0 border-b-[12px] border-l-[12px] border-b-white border-l-transparent transform translate-y-full -translate-x-1"></div>
             
             {/* Message header */}
             <div className="mb-2">
