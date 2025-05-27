@@ -1,16 +1,26 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { getAIConfig, validateAIConfig } from '@/lib/config/ai-providers';
 
 export function middleware(request: NextRequest) {
   // Only apply to API routes
   if (request.nextUrl.pathname.startsWith('/api/')) {
-    // Check if OPENAI_API_KEY is set
-    const apiKey = process.env.OPENAI_API_KEY;
-    
-    if (!apiKey) {
+    try {
+      const config = getAIConfig();
+      const validationError = validateAIConfig(config);
+      
+      if (validationError) {
+        return NextResponse.json(
+          { 
+            error: validationError
+          },
+          { status: 500 }
+        );
+      }
+    } catch (error) {
       return NextResponse.json(
         { 
-          error: 'OpenAI API key not configured. Please set the OPENAI_API_KEY environment variable.' 
+          error: 'AI configuration error. Please check your environment variables.' 
         },
         { status: 500 }
       );

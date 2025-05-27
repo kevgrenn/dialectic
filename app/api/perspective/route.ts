@@ -1,13 +1,8 @@
 import { NextResponse } from 'next/server';
-import OpenAI from 'openai';
+import { AIService, type AIMessage } from '@/lib/services/ai-service';
 
 // Define the perspective types
 type PerspectiveType = 'supportive' | 'critical';
-
-// Initialize the OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 // Define the system prompts for each perspective
 const SYSTEM_PROMPTS: Record<PerspectiveType, string> = {
@@ -22,16 +17,17 @@ Format your response in easily digestible chunks.
 Keep everything easy to read and digest.
 Always maintain a supportive, energetic tone while providing substantive insights.`,
 
-  critical: `You are a sharp-tongued devil's advocate who delights in poking holes in ideas.
-Your role is to be provocatively skeptical, witty, and confrontational while remaining intellectually honest.
+  critical: `You are a constructive critical thinker who helps users strengthen their ideas through rigorous analysis.
+Your role is to identify potential weaknesses, gaps, and unexamined assumptions in both the user's ideas and the supporter's arguments.
 Do not start your response with a title.
-Find the most absurd, naive, or problematic aspects of their thinking and call them out with clever, biting commentary.
-Use humor, sarcasm, and pointed questions to expose weaknesses, contradictions, and blind spots.
-Challenge their assumptions with "What if..." scenarios that reveal uncomfortable truths.
-Be spicy and memorable - make them squirm a little while forcing deeper thinking.
-Keep your response concise (50-100 words) but pack it with punch.
-Format your response in easily digestible chunks.
-Think like a brilliant contrarian who enjoys intellectual combat - be provocative but never mean-spirited.`
+Use academic critical thinking techniques: ask probing questions, examine evidence, consider alternative explanations, and explore potential consequences.
+Imagine the user has already implemented their idea but achieved poor results - what factors might have contributed to this outcome?
+Identify factual information or research that might challenge or complicate their assumptions.
+Explore potential downsides, unintended consequences, or implementation challenges they should consider.
+Ask thoughtful questions that encourage deeper reflection: "Have you considered...?", "What evidence supports...?", "How might this fail if...?"
+Maintain a friendly, collaborative tone focused on helping them develop a more robust and well-considered approach.
+Keep your response concise (50-100 words) but substantive.
+Format your response in easily digestible chunks.`
 };
 
 export async function POST(request: Request) {
@@ -55,7 +51,7 @@ export async function POST(request: Request) {
     }
 
     // Build the messages array for the conversation
-    const messages = [
+    const messages: AIMessage[] = [
       {
         role: 'system',
         content: SYSTEM_PROMPTS[perspective as PerspectiveType]
@@ -74,35 +70,15 @@ export async function POST(request: Request) {
       });
     }
 
-    // Create a stream response
-    const stream = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // Using GPT-4o-mini for cost efficiency, can upgrade to gpt-4o for better responses
-      messages: messages as Array<OpenAI.Chat.ChatCompletionMessageParam>,
+    // Create AI service instance and generate response
+    const aiService = new AIService();
+    const stream = await aiService.createChatCompletion(messages, {
       temperature: perspective === 'supportive' ? 0.7 : 0.9, // Higher temperature for critical perspective to be more creative and spicy
-      max_tokens: 200, // Reduced from 250 to target 70-100 words
+      maxTokens: 200, // Reduced from 250 to target 70-100 words
       stream: true,
     });
 
-    // Return the stream
-    const encoder = new TextEncoder();
-    const readable = new ReadableStream({
-      async start(controller) {
-        let responseText = '';
-        
-        for await (const chunk of stream) {
-          const content = chunk.choices[0]?.delta?.content || '';
-          if (content) {
-            responseText += content;
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
-          }
-        }
-        
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, fullContent: responseText })}\n\n`));
-        controller.close();
-      }
-    });
-
-    return new Response(readable, {
+    return new Response(stream, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
