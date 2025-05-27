@@ -31,7 +31,7 @@ To facilitate deeper understanding and clearer thinking by presenting contrastin
 
 - **Frontend**: Next.js, TailwindCSS, shadcn/ui
 - **State Management**: React Context API
-- **AI Integration**: OpenAI API (GPT-4o-mini)
+- **AI Integration**: Anthropic Claude Sonnet (default) or OpenAI GPT-4o-mini
 
 ## Getting Started
 
@@ -39,7 +39,7 @@ To facilitate deeper understanding and clearer thinking by presenting contrastin
 
 - Node.js 18.0 or later
 - npm or yarn
-- OpenAI API key (get one at https://platform.openai.com/api-keys)
+- AI API key (Anthropic or OpenAI)
 
 ### Installation
 
@@ -54,8 +54,23 @@ To facilitate deeper understanding and clearer thinking by presenting contrastin
    npm install
    ```
 
-3. Create a `.env.local` file in the root directory and add your OpenAI API key:
+3. Set up your environment variables:
+   
+   Copy the environment template and configure your API keys:
+   ```bash
+   cp env.template .env.local
    ```
+   
+   Then edit `.env.local` with your API key:
+   
+   **For Anthropic Claude (default):**
+   ```
+   ANTHROPIC_API_KEY=your_anthropic_api_key_here
+   ```
+   
+   **For OpenAI (alternative):**
+   ```
+   AI_PROVIDER=openai
    OPENAI_API_KEY=your_openai_api_key_here
    ```
 
@@ -65,6 +80,45 @@ To facilitate deeper understanding and clearer thinking by presenting contrastin
    ```
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+## AI Provider Configuration
+
+The application supports both Anthropic Claude and OpenAI models:
+
+### Default Configuration (Anthropic Claude)
+- **Provider**: Anthropic
+- **Model**: claude-3-5-sonnet-20241022
+- **Required**: `ANTHROPIC_API_KEY` environment variable
+
+### Alternative Configuration (OpenAI)
+To use OpenAI instead, set these environment variables:
+```
+AI_PROVIDER=openai
+OPENAI_API_KEY=your_openai_api_key_here
+```
+
+### Custom Model Configuration
+You can customize the specific models used:
+```
+# For Anthropic
+ANTHROPIC_MODEL=claude-3-5-sonnet-20241022
+
+# For OpenAI  
+OPENAI_MODEL=gpt-4o-mini
+```
+
+### Switching Between Providers
+You can easily switch between AI providers using the included scripts:
+
+```bash
+# Switch to Anthropic Claude (default)
+npm run switch:anthropic
+
+# Switch to OpenAI
+npm run switch:openai
+```
+
+These scripts will automatically update your `.env.local` file with the correct provider setting.
 
 ## User Flow
 
@@ -77,7 +131,7 @@ To facilitate deeper understanding and clearer thinking by presenting contrastin
 
 ## API Integration
 
-The application uses the OpenAI API to generate:
+The application uses AI APIs to generate:
 1. A supportive perspective that affirms and extends the user's ideas
 2. A critical perspective that challenges assumptions and offers alternatives
 3. A synthesis that identifies key points, consensus areas, and remaining questions

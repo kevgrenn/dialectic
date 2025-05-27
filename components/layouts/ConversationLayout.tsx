@@ -163,7 +163,7 @@ const ConversationLayout: React.FC = () => {
     
     try {
       // Add a system message indicating converse mode was requested
-      dispatch({ type: "ADD_USER_MESSAGE", payload: "You asked the supporter and critic to converse with each other]" });
+      dispatch({ type: "ADD_USER_MESSAGE", payload: "You asked the supporter and critic to converse with each other" });
       
       // Prepare conversation history
       const conversationHistory = [
@@ -339,7 +339,7 @@ const ConversationLayout: React.FC = () => {
                 {isSupporter ? 'Supporter' : 'Critic'}
               </h4>
               <p className="text-[12px] leading-[16px] text-[#777777]">
-                {isSupporter ? 'Affirms and extends core ideas' : 'Pokes holes with wit and sarcasm'}
+                {isSupporter ? 'Affirms and extends core ideas' : 'Strengthens ideas through thoughtful questioning'}
               </p>
             </div>
             
@@ -395,7 +395,7 @@ const ConversationLayout: React.FC = () => {
                 {isSupporter ? 'Supporter' : 'Critic'}
               </h4>
               <p className="text-[12px] leading-[16px] text-[#777777]">
-                {isSupporter ? 'Affirms and extends core ideas' : 'Pokes holes with wit and sarcasm'}
+                {isSupporter ? 'Affirms and extends core ideas' : 'Strengthens ideas through thoughtful questioning'}
               </p>
             </div>
             

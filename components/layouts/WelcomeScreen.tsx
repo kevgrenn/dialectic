@@ -73,7 +73,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ hideCard = false }) => {
       type: "SET_PERSPECTIVE_B",
       payload: {
         name: "Critic",
-        description: "Pokes holes with wit and sarcasm",
+        description: "Strengthens ideas through thoughtful questioning",
         messages: [],
       },
     });

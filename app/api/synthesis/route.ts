@@ -1,10 +1,5 @@
 import { NextResponse } from 'next/server';
-import OpenAI from 'openai';
-
-// Initialize the OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import { AIService, type AIMessage } from '@/lib/services/ai-service';
 
 export async function POST(request: Request) {
   try {
@@ -40,13 +35,11 @@ export async function POST(request: Request) {
       }
     }
 
-    // Create a stream response
-    const stream = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: 'system',
-          content: `You are a dialectical synthesis generator. 
+    // Build the messages array for synthesis
+    const messages: AIMessage[] = [
+      {
+        role: 'system',
+        content: `You are a dialectical synthesis generator. 
 Based on the conversation between the user and two contrasting perspectives (enthusiastic supporter and skeptical critic), 
 create a balanced synthesis that:
 1. Identifies the strongest arguments from both the supportive and critical perspectives
@@ -61,37 +54,22 @@ Format any headings or section names as bold text using markdown (e.g., **Headin
 Keep everything easy to read and digest.
 Format your response in Markdown with clear sections for each of these components.
 Be concise but comprehensive, focusing on the most important insights.`
-        },
-        {
-          role: 'user',
-          content: `Please generate a synthesis of this dialectical conversation:\n\n${conversationHistory.join('\n\n')}`
-        }
-      ],
+      },
+      {
+        role: 'user',
+        content: `Please generate a synthesis of this dialectical conversation:\n\n${conversationHistory.join('\n\n')}`
+      }
+    ];
+
+    // Create AI service instance and generate response
+    const aiService = new AIService();
+    const stream = await aiService.createChatCompletion(messages, {
       temperature: 0.5,
-      max_tokens: 300,
+      maxTokens: 300,
       stream: true,
     });
 
-    // Return the stream
-    const encoder = new TextEncoder();
-    const readable = new ReadableStream({
-      async start(controller) {
-        let synthesisText = '';
-        
-        for await (const chunk of stream) {
-          const content = chunk.choices[0]?.delta?.content || '';
-          if (content) {
-            synthesisText += content;
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
-          }
-        }
-        
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, fullContent: synthesisText })}\n\n`));
-        controller.close();
-      }
-    });
-
-    return new Response(readable, {
+    return new Response(stream, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
