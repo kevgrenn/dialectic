@@ -87,7 +87,7 @@ The application supports both Anthropic Claude and OpenAI models:
 
 ### Default Configuration (Anthropic Claude)
 - **Provider**: Anthropic
-- **Model**: claude-3-5-sonnet-20241022
+- **Model**: claude-sonnet-4-6
 - **Required**: `ANTHROPIC_API_KEY` environment variable
 
 ### Alternative Configuration (OpenAI)
@@ -101,7 +101,7 @@ OPENAI_API_KEY=your_openai_api_key_here
 You can customize the specific models used:
 ```
 # For Anthropic
-ANTHROPIC_MODEL=claude-3-5-sonnet-20241022
+ANTHROPIC_MODEL=claude-sonnet-4-6
 
 # For OpenAI  
 OPENAI_MODEL=gpt-4o-mini

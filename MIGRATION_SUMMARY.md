@@ -9,7 +9,7 @@ Your Dialectic app has been successfully updated to support both **Anthropic Cla
 ## New Features
 
 ### 🤖 Dual AI Provider Support
-- **Default**: Anthropic Claude 3.5 Sonnet (latest model)
+- **Default**: Anthropic Claude Sonnet 4.6 (latest model)
 - **Alternative**: OpenAI GPT-4o-mini (your previous setup)
 - Easy switching between providers without code changes
 
@@ -77,7 +77,7 @@ npm run switch:anthropic
 ```
 AI_PROVIDER=anthropic
 ANTHROPIC_API_KEY=your_anthropic_api_key_here
-ANTHROPIC_MODEL=claude-3-5-sonnet-20241022  # optional, this is the default
+ANTHROPIC_MODEL=claude-sonnet-4-6  # optional, this is the default
 ```
 
 ### For OpenAI (alternative)
